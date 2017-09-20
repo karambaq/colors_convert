@@ -27,29 +27,29 @@ class Colors(QWidget):
         self.setWindowTitle('Center')
 
         self.h_label = QLabel('H', self)
-        self.h_label.move(30, 766)
+        self.h_label.move(30, 716)
         self.h_sld = QSlider(Qt.Horizontal, self)
         self.h_sld.setRange(0, 360)
         self.h_sld.setPageStep(1)
-        self.h_sld.move(50, 750)
+        self.h_sld.move(50, 700)
         self.h_sld.resize(500, 50)
         # self.h_sld.valueChanged[int].connect(self.h_slider_change)
 
         self.s_label = QLabel('S', self)
-        self.s_label.move(30, 801)
+        self.s_label.move(30, 741)
         self.s_sld = QSlider(Qt.Horizontal, self)
         self.s_sld.setRange(0, 100)
         self.s_sld.setPageStep(1)
-        self.s_sld.move(50, 785)
+        self.s_sld.move(50, 725)
         self.s_sld.resize(500, 50)
         # self.s_sld.valueChanged.connect(self.s_slider_change)
 
         self.v_label = QLabel('V', self)
-        self.v_label.move(30, 836)
+        self.v_label.move(30, 766)
         self.v_sld = QSlider(Qt.Horizontal, self)
         self.v_sld.setRange(0, 100)
         self.v_sld.setPageStep(1)
-        self.v_sld.move(50, 820)
+        self.v_sld.move(50, 750)
         self.v_sld.resize(500, 50)
         # self.v_sld.valueChanged.connect(self.v_slider_change)
 
@@ -78,7 +78,8 @@ class Colors(QWidget):
         to_blue.clicked.connect(self.to_blue_on_click)
 
         to_hsv = QPushButton('To HSV', self)
-        to_hsv.move(700, 800)
+        to_hsv.move(650, 700)
+        to_hsv.resize(150, 100)
         to_hsv.clicked.connect(self.to_hsv)
 
 
