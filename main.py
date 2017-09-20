@@ -3,6 +3,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+
+import math
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QLabel, QFileDialog, QPushButton, QSlider
@@ -79,6 +81,7 @@ class Colors(QWidget):
         to_hsv.move(700, 800)
         to_hsv.clicked.connect(self.to_hsv)
 
+
         self.show()
 
 
@@ -132,15 +135,6 @@ class Colors(QWidget):
         if filename:
             self.pixmap = QPixmap(filename).scaled(670, 500)
 
-    # def h_slider_change(self, value):
-        # self.hsv()
-
-    # def s_slider_change(self, value):
-        # self.hsv()
-
-    # def v_slider_change(self, value):
-        # self.hsv()
-
     def to_hsv(self):
         self.hsv()
 
@@ -152,7 +146,15 @@ class Colors(QWidget):
                 g = QColor(img.pixel(x, y)).green()
                 b = QColor(img.pixel(x, y)).blue()
                 h, s, v = self.rgb2hsv(r, g, b)
-                img.setPixel(x, y, QColor(h, s, v).rgb())
+                dh = self.h_sld.value()
+                ds = self.s_sld.value() * 0.01
+                dv = self.v_sld.value() * 0.01
+                h1 = (h + dh) % 360
+                s1 = max(min(s + ds, 1), 0)
+                v1 = max(min(v + dv, 1), 0)
+                r1, g1, b1 = self.hsv2rgb(h1, s1, v1)
+                img.setPixel(x, y, QColor(r1, g1, b1).rgb())
+
         self.label.setPixmap(QPixmap(img))
         self.show()
 
@@ -175,6 +177,33 @@ class Colors(QWidget):
             s = df / mx
         v = mx
         return h, s, v
+
+    def hsv2rgb(self, h, s, v):
+        h = float(h)
+        s = float(s)
+        v = float(v)
+        h60 = h / 60.0
+        h60f = math.floor(h60)
+        hi = int(h60f) % 6
+        f = h60 - h60f
+        p = v * (1 - s)
+        q = v * (1 - f * s)
+        t = v * (1 - (1 - f) * s)
+        r, g, b = 0, 0, 0
+        if hi == 0:
+            r, g, b = v, t, p
+        elif hi == 1:
+            r, g, b = q, v, p
+        elif hi == 2:
+            r, g, b = p, v, t
+        elif hi == 3:
+            r, g, b = p, q, v
+        elif hi == 4:
+            r, g, b = t, p, v
+        elif hi == 5:
+            r, g, b = v, p, q
+        r, g, b = int(r * 255), int(g * 255), int(b * 255)
+        return r, g, b
 
     def open_on_click(self):
         self.open_file_name_dialog()
