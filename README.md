@@ -1,5 +1,9 @@
 # Colors_convert
 
+# How to run
+```
+	python main.py
+```
 # Histograms
 
 ## Grayscale histogram.
