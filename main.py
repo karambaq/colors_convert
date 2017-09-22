@@ -188,11 +188,11 @@ class Colors(QWidget):
     def hsv(self):
         img = self.pixmap.toImage()
         dh = self.h_sld.value() - self.h_diff
-        print('dh:', dh)
+        # print('dh:', dh)
         ds = (self.s_sld.value() - self.s_diff) * 0.01
-        print('ds:', ds)
+        # print('ds:', ds)
         dv = (self.v_sld.value() - self.v_diff) * 0.01
-        print('dv:', dv)
+        # print('dv:', dv)
         for x in range(img.width()):
             for y in range(img.height()):
                 r = QColor(img.pixel(x, y)).red()
@@ -207,7 +207,7 @@ class Colors(QWidget):
         self.h_diff = self.h_sld.value()
         self.s_diff = self.s_sld.value()
         self.v_diff = self.v_sld.value()
-        print(self.s_diff)
+        # print(self.s_diff)
         self.pixmap = QPixmap(img)
         self.label.setPixmap(QPixmap(img))
         self.show()
