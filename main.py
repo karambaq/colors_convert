@@ -8,6 +8,7 @@ import math
 from PyQt5.QtGui import QPixmap, QColor
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import QWidget, QDesktopWidget, QApplication, QLabel, QFileDialog, QPushButton, QSlider
+from PIL import Image
 
 
 class Colors(QWidget):
@@ -19,38 +20,47 @@ class Colors(QWidget):
         self.label.resize(670, 500)
         self.label.move(25, 25)
         self.pixmap = QPixmap()
+        self.firstImage = False
+        self.secImage = False
         self.init_ui()
 
     def init_ui(self):
-        self.resize(1200, 850)
+        self.setFixedSize(900, 550)
+        self.pos()
         self.center()
         self.setWindowTitle('Center')
 
         self.h_label = QLabel('H', self)
-        self.h_label.move(30, 716)
+        self.h_label.move(710, 350)
+        self.label.mousePressEvent = self.label_clicked
         self.h_sld = QSlider(Qt.Horizontal, self)
         self.h_sld.setRange(0, 360)
         self.h_sld.setPageStep(1)
-        self.h_sld.move(50, 700)
-        self.h_sld.resize(500, 50)
+        self.h_sld.move(720, 350)
+        self.h_sld.resize(150, 10)
+        self.h_diff = 0
         # self.h_sld.valueChanged[int].connect(self.h_slider_change)
 
         self.s_label = QLabel('S', self)
-        self.s_label.move(30, 741)
+        self.s_label.move(710, 405)
         self.s_sld = QSlider(Qt.Horizontal, self)
-        self.s_sld.setRange(0, 100)
+        self.s_sld.setRange(-50, 50)
         self.s_sld.setPageStep(1)
-        self.s_sld.move(50, 725)
-        self.s_sld.resize(500, 50)
+        self.s_sld.setValue(0)
+        self.s_sld.move(720, 400)
+        self.s_sld.resize(150, 30)
+        self.s_diff = 0
         # self.s_sld.valueChanged.connect(self.s_slider_change)
 
         self.v_label = QLabel('V', self)
-        self.v_label.move(30, 766)
+        self.v_label.move(710, 455)
         self.v_sld = QSlider(Qt.Horizontal, self)
-        self.v_sld.setRange(0, 100)
+        self.v_sld.setRange(-50, 50)
+        self.v_sld.setValue(0)
         self.v_sld.setPageStep(1)
-        self.v_sld.move(50, 750)
-        self.v_sld.resize(500, 50)
+        self.v_sld.move(720, 450)
+        self.v_sld.resize(150, 30)
+        self.v_diff = 0
         # self.v_sld.valueChanged.connect(self.v_slider_change)
 
         choose_img = QPushButton('Открыть', self)
@@ -78,25 +88,49 @@ class Colors(QWidget):
         to_blue.clicked.connect(self.to_blue_on_click)
 
         to_hsv = QPushButton('To HSV', self)
-        to_hsv.move(650, 700)
-        to_hsv.resize(150, 100)
+        to_hsv.move(750, 500)
         to_hsv.clicked.connect(self.to_hsv)
 
-
         self.show()
 
+    def label_clicked(self, event):
+        if self.secImage:
+            self.label.setPixmap(QPixmap('SubOfImages.png').scaled(670, 500))
+            self.show()
+        if self.firstImage:
+            self.label.setPixmap(QPixmap('difWeights.jpg').scaled(670, 500))
+            self.show()
+            self.firstImage = False
+            self.secImage = True
 
     def to_grey_on_click(self):
-        img = self.pixmap.toImage()
-        for x in range(img.width()):
-            for y in range(img.height()):
-                r = QColor(img.pixel(x, y)).red()
-                g = QColor(img.pixel(x, y)).green()
-                b = QColor(img.pixel(x, y)).blue()
-                a = (0.2126 * r + 0.7152 * g + 0.0722 * b)
-                img.setPixel(x, y, QColor(a, a, a).rgb())
-        self.label.setPixmap(QPixmap(img))
+        img1 = Image.open(self.filename)
+        img2 = Image.open(self.filename)
+        pix1 = img1.load()
+        pix2 = img2.load()
+        width, height = img1.size
+        img3 = Image.new('L', img1.size)
+        pix3 = img3.load()
+        min = 0
+        for i in range(width):
+            for j in range(height):
+                pix1[i, j] = self.eqweights(pix1[i, j][0], pix1[i, j][1], pix1[i, j][2])
+                pix2[i, j] = self.difweights(pix2[i, j][0], pix2[i, j][1], pix2[i, j][2])
+                m = pix1[i, j][0] - pix2[i, j][0]
+                if min > m:
+                    min = m
+
+        for i in range(width):
+            for j in range(height):
+                pix3[i, j] = pix1[i, j][0] - pix2[i, j][0] + abs(min)
+                print(pix3[i, j])
+
+        img1.save('eqWeights.jpg')
+        img2.save('difWeights.jpg')
+        img3.save('SubOfImages.png')
+        self.label.setPixmap(QPixmap('eqWeights.jpg').scaled(670, 500))
         self.show()
+        self.firstImage = True
 
     def to_red_on_click(self):
         img = self.pixmap.toImage()
@@ -131,31 +165,50 @@ class Colors(QWidget):
     def open_file_name_dialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        filename, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "",
+        self.filename, _ = QFileDialog.getOpenFileName(self, "QFileDialog.getOpenFileName()", "",
                                                   "Images (*.jpg *.jpeg *.png)", options=options)
-        if filename:
-            self.pixmap = QPixmap(filename).scaled(670, 500)
+        self.h_sld.setValue(0)
+        self.s_sld.setValue(0)
+        self.v_sld.setValue(0)
+        if self.filename:
+            self.pixmap = QPixmap(self.filename).scaled(670, 500)
+
+    # def h_slider_change(self, value):
+        # print(value)
+
+    # def s_slider_change(self, value):
+        # self.hsv()
+
+    # def v_slider_change(self, value):
+        # self.hsv()
 
     def to_hsv(self):
         self.hsv()
 
     def hsv(self):
         img = self.pixmap.toImage()
+        dh = self.h_sld.value() - self.h_diff
+        print('dh:', dh)
+        ds = (self.s_sld.value() - self.s_diff) * 0.01
+        print('ds:', ds)
+        dv = (self.v_sld.value() - self.v_diff) * 0.01
+        print('dv:', dv)
         for x in range(img.width()):
             for y in range(img.height()):
                 r = QColor(img.pixel(x, y)).red()
                 g = QColor(img.pixel(x, y)).green()
                 b = QColor(img.pixel(x, y)).blue()
                 h, s, v = self.rgb2hsv(r, g, b)
-                dh = self.h_sld.value()
-                ds = self.s_sld.value() * 0.01
-                dv = self.v_sld.value() * 0.01
                 h1 = (h + dh) % 360
                 s1 = max(min(s + ds, 1), 0)
                 v1 = max(min(v + dv, 1), 0)
                 r1, g1, b1 = self.hsv2rgb(h1, s1, v1)
                 img.setPixel(x, y, QColor(r1, g1, b1).rgb())
-
+        self.h_diff = self.h_sld.value()
+        self.s_diff = self.s_sld.value()
+        self.v_diff = self.v_sld.value()
+        print(self.s_diff)
+        self.pixmap = QPixmap(img)
         self.label.setPixmap(QPixmap(img))
         self.show()
 
@@ -226,6 +279,14 @@ class Colors(QWidget):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+
+    def eqweights(self, r, g, b):
+        pixel = int(0.33 * (r + g + b))
+        return pixel, pixel, pixel
+
+    def difweights(self, r, g, b):
+        pixel = int(r * 0.299 + g * 0.587 + b * 0.114)
+        return pixel, pixel, pixel
 
 
 if __name__ == '__main__':
