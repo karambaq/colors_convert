@@ -1,5 +1,9 @@
 # Colors_convert
 
+# Install dependencies:
+```
+pip3 install -U -r requirements.txt
+```
 # How to run
 ```
 python main.py
@@ -7,16 +11,13 @@ python main.py
 # Histograms
 
 ## Grayscale histogram.
-![Screenshot](grayscale_hist.png "Grayscale histogram.")
+![Screenshot](histograms/greyscale_histo.png "Grayscale histogram.")
 
 ## Red histogram.
-![Screenshot](red_hist.png "Red histogram.")
+![Screenshot](histograms/red_histo.png "Red histogram.")
 
 ## Green histogram.
-![Screenshot](green_hist.png "Green histogram.")
+![Screenshot](histograms/green_histo.png "Green histogram.")
 
 ## Blue histogram.
-![Screenshot](blue_hist.png "Blue histogram.")
-
-## RGB histogram.
-![Screenshot](rgb_hist.png "RGB histogram.")
+![Screenshot](histograms/blue_histo.png "Blue histogram.")
